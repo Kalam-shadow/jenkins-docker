@@ -14,6 +14,14 @@ pipeline {
                 script {
                     // Builds the image using the Dockerfile we just wrote
                     customImage = docker.build("${DOCKER_USER}/${IMAGE_NAME}:${env.BUILD_ID}")
+
+                    //Stop and remove the old container if it exists
+                    sh "docker stop ${IMAGE_NAME} || true"
+                    sh "docker rm ${IMAGE_NAME} || true"
+
+                    // 2. Run the new image indefinitely in detached mode
+                    // We map host port 8085 to container port 80
+                    sh "docker run -d --name ${IMAGE_NAME} -p 8085:80 ${DOCKER_USER}/${IMAGE_NAME}:latest"
                 }
             }
         }
